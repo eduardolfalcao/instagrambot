@@ -51,11 +51,11 @@ public class Main {
 	
 		InstagramSearchUsernameResult userResult = InstagramActions.getUserHandle(instagram, p.getProperty("login"));	
 		
-		while(true) {			
-			System.out.println("######### Starting a new following round!\n");			
+		while(true) {									
 			double percent = drawNumber(1,3);
 			double numFollowers = InstagramActions.mapFollowers(instagram, userResult).size();
-			int limit = (int) (percent/100.0 * numFollowers);			
+			int limit = (int) (percent/100.0 * numFollowers);
+			System.out.println("######### Starting a new following round! "+limit+" accounts will be requested!\n");
 			String target = targetAccounts.poll();
 			InstagramActions.followFollowersOf(instagram, target, requestSent, limit);
 			targetAccounts.offer(target);
