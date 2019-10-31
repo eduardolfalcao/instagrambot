@@ -1,4 +1,4 @@
 config.properties
 target.txt
 /target/
-/bin/
+/bin/*
