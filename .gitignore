@@ -1,3 +1,4 @@
 config.properties
-targets.txt
+target.txt
 /target/
+/bin/
