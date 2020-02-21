@@ -5,8 +5,13 @@ import java.util.List;
 
 import org.brunocvcunha.instagram4j.Instagram4j;
 import org.brunocvcunha.instagram4j.requests.InstagramGetMediaCommentsRequest;
+import org.brunocvcunha.instagram4j.requests.InstagramGetMediaInfoRequest;
+import org.brunocvcunha.instagram4j.requests.InstagramGetMediaLikersRequest;
 import org.brunocvcunha.instagram4j.requests.payload.InstagramComment;
 import org.brunocvcunha.instagram4j.requests.payload.InstagramGetMediaCommentsResult;
+import org.brunocvcunha.instagram4j.requests.payload.InstagramGetMediaInfoResult;
+import org.brunocvcunha.instagram4j.requests.payload.InstagramGetMediaLikersResult;
+import org.brunocvcunha.instagram4j.requests.payload.InstagramUserSummary;
 
 import br.com.everdata.instagram.utils.SimpleGetRequest;
 
@@ -43,7 +48,39 @@ public class InstagramActions {
 		return allComments;
 	}
 	
-	private static long getMediaIdFromCode(Instagram4j instagram, String postId) {
+	public static InstagramGetMediaInfoResult getMediaInfo(Instagram4j instagram, String postId) {
+		long mediaId = getMediaIdFromCode(instagram,postId);
+		
+		InstagramGetMediaInfoRequest requestMediaInfo = new InstagramGetMediaInfoRequest(mediaId);
+		InstagramGetMediaInfoResult mediaInfoResult = null;
+		try {
+			mediaInfoResult = instagram.sendRequest(requestMediaInfo);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return mediaInfoResult;
+	}
+	
+	public static List<InstagramUserSummary> getMediaLikers(Instagram4j instagram, String postId) {
+		long mediaId = getMediaIdFromCode(instagram,postId);
+		
+		InstagramGetMediaLikersRequest requestMediaLikers = new InstagramGetMediaLikersRequest(mediaId);		
+		InstagramGetMediaLikersResult mediaLikersResult = null;
+		try {
+			mediaLikersResult = instagram.sendRequest(requestMediaLikers);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return mediaLikersResult.getUsers();
+		
+
+	}
+	
+	public static long getMediaIdFromCode(Instagram4j instagram, String postId) {
 		
 		String pagesource = null;
         try {

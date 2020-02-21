@@ -1,0 +1,67 @@
+package br.com.everdata.instagram.utils;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.Security;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Base64;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.io.pem.PemReader;
+
+public class KeyUtils {
+
+	private static PrivateKey privKey;
+	
+	public static PrivateKey getPrivKey() {
+		return privKey;
+	}
+	
+	static {
+		Security.addProvider(new BouncyCastleProvider());
+		String base64PrivKey = System.getenv("PRIVATE_KEY");
+		try {
+			privKey = getPrivateKey(base64PrivKey);
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException | IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+//	public static void main(String[] args) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
+//			NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException, InvalidKeySpecException, IOException {
+//		String data = "JU69sWDCmcue9gwG3GGwpn/S4cCImU827TOghMyfTSP2P89yTE+Y7vlLRMQGiheLAselAm7J7FTmzbDdDoKmrm8fD0GvPI6MxyXOKCfjciQjtHPAqLDZCnDtwOaVYeXW6Cgwx2WTXe/Yi3HbIEC4cOHqXjwde97WCCjtrTSOmCzexBVEX9KNiaw07gd5DuOe9QfHxNMKP3obrTLw0PoxFOCpYjQxsmenoo983VTCxc7yDR/UfenZgN13Upak31CD26E2xiVMnoRCad2kX1UHNiEr5o3KqoGuy5Hbvl1tAaz9v2hweA5X+S7zpVpkUo0Vui42vluyHTuAyOk0oNgxfg==";
+//		String base64PrivateKey = "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcEFJQkFBS0NBUUVBdldCMTlrRWg1OE1ZY0sySkgrdSsvdXlvMWw5RjdOYURWK2tnTDRwbldZaENSTWxICkRjNmZiWXpHZ0VPVE1RQlJteS9YTzBVd0tLVU92NktWWTFGR0VOYWdFME52RGRIalRmQXl6dU9BUmpmbjlueGwKQkZ1RmJ5MnQzb2JTR25ic1FhcHpaQ1RyRllVY3ZseDJyY3R3dlJiYzFXOWpwNjZPNDM2L04waEdSSHJXWFcrMQpjbW1oWjNTQkRoRHoyejJYcFN4VnF0N2xteHBkUjFHMkVrQ0RSTHBXd0Z1MklFQUg1aDJ3TUorVEdESCtQU3B2CncwMFJKRlRVQVdyUVhNODRvekRsalVoRkVzNFhTUHlqZFFaaHpCU29iNTBwRzFVSlJMOVB4NTlaZWwxQS9QeHIKejFjdXVWNXgxbm9FZVNxSnAyRVM2SlprSU9oYm1BTVA2end2NndJREFRQUJBb0lCQUJYMmFHZlJRTzNnZGVhbgpjWVkyc0hWZkcrdVVyQWJlRCtoem5HeDNDQ3BkZjVYN285WnBscHE5WDA0RHlEL0FFamJGc3hmb0c4QXkrRVZvClJSdjZFbjZrYlhjZWRIUXRXY2V4cWlyTlBwU21LaXd2WEFYSDJXODk1SEt3dnhBYnA2V3I3MnIzVHg0MVRGS1YKWlp3ZFFtdGppZVBrNGJGU01MY1lmWE9iV2E3YVB3bVA1RkJnemVHVjJZOEsyN0pxK3V6SDlqcVRjRGhiTVpxSApGR2dabk13eURiQ0NjandwTGRBUTZ2eU5GT3FTTWZzdndzTjM0azJZR1gzNVBJdnQxYVZZM004cUtNNmRNYXJmCmNWVFZpNUcvZURLUlhZckRYbnk2dFg0TUdQaDcwZ2U4cjBWSkgvYVVQTFBJWW5FemtNRkkyUFZnVDAreVlQbHgKSXBUa3IwMENnWUVBMXorNDZ6dCtXRWoyYU9LWi93RFhyUzRIQUZhWVNzQ2QzMnVGcnc5YnRnL01HTEdtOTJqWAp4UDZSRzJFL2tyaTZJVHBNdHdsRy9TY3FMa0FnOVhGMVJ4bTFLc2wrQmg1QXlDektUZmlxNEluQmlqeVJ4MlBoClFSMXV6MHhiekZLbkFRV3Q5UFpRMlJPUFQxTmw5L1VYUjZPS1B4amZuWTF4UUJKUURhbFBPVjhDZ1lFQTRUclIKVVpMSVllRU1mejJGWVpHOWRlOEthOHMzMTVzWmhMamxjVktORUQyS21SMVdGeURJeHlwWmdES2Q0RnBnNC9RagprQmswUHpoelB3Rng2MUVnSURiVDBjMW9SQlVqcCsxa1MxYVNCY0VSbDJ0dERrZ3YwZXNFWDRQWmlXV1h3QmNsClJWcGlTM3hXLzUzbk1aak9aWUVJSE9CKzB0WUlCTDRQK0dlU3VQVUNnWUVBeUpnTzZkRjR6aWU0MDBnU0FXNDAKa0tTclM2cG5wSXBhMWdKckJCakkvQ00rcmVpcFZEbzFrdFUyUDVEaVlRYWNGeWt3b3djWFRBWjZyYjEvdVp5eAprY0FvY0taME5wbHMvOStWN1JJSGxOZHNNVHAvRkpWRkw1eVJUc2kzWi9QQ3hSWVk1b2ZDRW5yQy9FY1phUG5VClp5UEdTMFVQNTlFUHNJa2daNHJZVlBzQ2dZQVcvNDZJS2RqVVJjcWs0MzlQS3phUmFFdEVIb2doTi9FdklFSXQKaENScldCMWk3Ui94VktPcjBxTTQ5L0l2Q291Q08xZTJTeHlPcUJEOGlnVTc1aGpGc1ZPSHhOVzB2Z1BhRGQrRAo0ZDhmUDB1d2pvT2dSYmE4VktjcHFhajQ0cXJRTG96YnZCTDFha2puNlJQR2VMZjZuV1phcklIR3Zad3IvOHhaCnJSbktVUUtCZ1FESFNFNnhhODZjL0xRVDVvV1RBRmNkYmd5OWRkWmRCclBTbUJCd2NGajUyT3Y3YVVXV0pBTUIKZmtYVGJ3ZHd3cUwxN1JuN0FFSjJ5bU5rSFQzc1R3REtRTDFFZlFzVnN0NGhMZGFiQTFwYmZjUTllYWwvU2JCaApETFowWkM1NnZyblkwTW5PWjJXdTdGRWw2eTMrMHQydHZqZzVBaHVPSkw0NGdJcTY5Um5lcHc9PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==";
+//		System.out.println(decrypt(data, base64PrivateKey));
+//	}
+	
+	public static String decrypt(String data) throws IllegalBlockSizeException, InvalidKeyException, BadPaddingException, NoSuchAlgorithmException,
+			NoSuchPaddingException, NoSuchProviderException, InvalidKeySpecException, IOException {
+		return decrypt(Base64.getDecoder().decode(data.getBytes()), privKey);
+	}
+
+	private static String decrypt(byte[] data, PrivateKey privateKey) throws NoSuchPaddingException,
+			NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+		Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-1AndMGF1Padding");
+		cipher.init(Cipher.DECRYPT_MODE, privateKey);
+		return new String(cipher.doFinal(data));
+	}
+
+	private static PrivateKey getPrivateKey(String base64PrivateKey) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		String decodedKey = new String(Base64.getDecoder().decode(base64PrivateKey));		
+		PemReader reader = new PemReader(new StringReader(decodedKey));
+		PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(reader.readPemObject().getContent());
+		return KeyFactory.getInstance("RSA").generatePrivate(spec);
+	}
+
+}
